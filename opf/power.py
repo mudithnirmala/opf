@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0,'/content/drive/My Drive/codes/OPF')
 import glob
 import warnings
 import math
@@ -16,6 +18,7 @@ OPFNotConverged = pp.OPFNotConverged
 
 def load_case(case_name, data_dir, reindex=True):
     custom_cases = ['denmark']
+   # print(pp.networks)
     if hasattr(pp.networks, case_name):
         net = getattr(pp.networks, case_name)()
         if case_name == 'iceland':
@@ -28,6 +31,7 @@ def load_case(case_name, data_dir, reindex=True):
         os.mkdir(os.path.join(data_dir, case_name))
     if reindex:
         pp.create_continuous_bus_index(net, start=0)
+    print(net)
     return net
 
 

@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0,'/content/drive/My Drive/codes/OPF')
+
 import os
 import numpy as np
 from multiprocessing import Pool, Value
@@ -13,7 +16,7 @@ import pandapower as pp
 
 
 class OPFData(_data):
-    def __init__(self, data_dir, case_name, ratio_train, ratio_valid, A_scaling=0.001, A_threshold=0.01,
+    def __init__(self, data_dir, case_name, ratio_train, ratio_valid, A_scaling=0.001, A_threshold=0.01, # what are thsse scaling and thresshodld???????????????
                  dataType=np.float64, device='cpu', use_constraints=True):
         super().__init__()
         self.dataType = dataType
@@ -23,13 +26,13 @@ class OPFData(_data):
         self.ratio_valid = ratio_valid
         self.data_dir = data_dir
 
-        self.net = load_case(case_name, data_dir)
-        self.manager = NetworkManager(self.net)
+        self.net = load_case(case_name, data_dir) #loading network
+        self.manager = NetworkManager(self.net) # read opf power
 
         data = np.load(os.path.join(data_dir, case_name, "data.npz"))
         self.gen = data['gen']
-        self.inputs = np.transpose(data['bus'], [0, 2, 1])
-        nDataPoints = self.inputs.shape[0]
+        self.inputs = np.transpose(data['bus'], [0, 2, 1]) # what is this second arguements???????????????????
+        nDataPoints = self.inputs.shape[0] #number of test cases????????????????
 
         if use_constraints:
             constraints = np.repeat(np.expand_dims(self.manager.get_constrains().T, axis=0), nDataPoints, axis=0)
@@ -84,7 +87,7 @@ class OPFData(_data):
     def linf(self, yHat, y):
         return np.mean(np.max((y - yHat), axis=1), axis=0)
 
-    def cost_percentage(self, yHat, y):
+    def cost_percentage(self, yHat, y): #????????????????????????
         cHat = []
         c = []
         violated_count = 0
@@ -183,11 +186,11 @@ def f(manager, length, data):
 if __name__ == '__main__':
     os.chdir("..")
     # Parameters
-    case_name = "case118"
+    case_name = "case30"
     state = "AK"  # state to use data from
     load_scale = 1.0  # scale the load by a factor
     portion_commercial = 0.5  # how much power should be commercial
-    data_dir = "data/"
+    data_dir ="/home/ubuntu/OPF/" +"data/"
 
     case_dir = os.path.join(data_dir, case_name)
     profile_dir = data_dir + "load_profiles/"
@@ -212,4 +215,5 @@ if __name__ == '__main__':
     bus = np.stack(list(filter(isNotNone, bus)))
     gen = np.stack(list(filter(isNotNone, gen)))
     print(gen.shape)
-    np.savez(os.path.join(case_dir, "data.npz"), load=load, bus=bus, gen=gen, constraints=constraints)
+    #np.savez(os.path.join(case_dir, "data.npz"), load=load, bus=bus, gen=gen, constraints=constraints)
+    np.savez(os.path.join(case_dir, "data.npz"), load=load, bus=bus, gen=gen)

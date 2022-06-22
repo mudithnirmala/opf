@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0,'/content/drive/My Drive/codes/OPF')
+
 import sklearn
 import skorch
 from opf.data import OPFData
@@ -15,7 +18,7 @@ import time
 os.chdir("..")
 
 case_name = "case30"
-data_dir = "data"
+data_dir = "OPF/data"
 ratio_train = 0.9
 ratio_valid = 0
 device = 'cuda:0'
@@ -23,7 +26,7 @@ device = 'cuda:0'
 param_meta = {
     'A_scaling': 0.001,
     'A_threshold': 0.01,
-    'model': 'selection',
+    'model': 'local',
     'local': False
 }
 
@@ -47,22 +50,26 @@ param_grid = {
 model = param_meta['model']
 if grid_search:
     param_fit = {}
+
 elif model == 'MLP':
     param_meta['local'] = False
-    param_fit = {'max_epochs': 50, 'module__dimNodeSignals': [4], 'module__nFilterTaps': [],
-                 'module__dimLayersMLP': [128, 64, case_info['num_gen']], 'module__nSelectedNodes': [],
-                 'module__poolingSize': []}
-elif model == "selection":
+    param_fit = {'max_epochs':50, 'module_dimNodeSignals':[4],'module__nFilterTaps':[],
+                'module__dimLayerMLP': [128,64,case_info['num_gen']],'module__nSelectedNodes':[],
+                'module__poolingSize':[]}
+
+elif model =='Selection':
     param_meta['local'] = False
-    param_fit = {'max_epochs': 50, 'module__dimLayersMLP': [case_info['num_gen']],
-                 'module__dimNodeSignals': [4, 128, 64], 'module__nFilterTaps': [4, 4],
-                 'module__nSelectedNodes': [N, N], 'module__poolingSize': [1, 1]}
+    param_fit = {'max_epochs':50, 'module__dimLayersMLP': [case_info['num_gen']],
+                'module__dimNodeSignals': [4,128,64],'module__nFilterTaps':[5,5],
+                'module__nSelectedNodes': [N,N],'module__poolingSize':[1,1]}
+    
 elif model == "local":
     param_meta['local'] = True
-    param_fit = {'max_epochs': 50, 'module__dimNodeSignals': [4, 128, 64, 1], 'module__nFilterTaps': [4, 4, 1]}
-elif model == "localMLP":
+    param_fit = {'max_epochs':50, 'module__dimNodeSignals':[4,128,64,1],'module__nFilterTaps':[5,5,1]}
+
+elif model == 'localMLP':
     param_meta['local'] = True
-    param_fit = {'max_epochs': 50, 'module__dimNodeSignals': [4, 128, 64], 'module__nFilterTaps': [1, 1]}
+    param_fit = {'max_epochs':50, 'module__dimNodeSignals':[4,128,64],'module__nFilterTaps':[1,1]}
 else:
     param_fit = {}
 
